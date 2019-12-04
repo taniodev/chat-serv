@@ -18,6 +18,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install pipenv
         pipenv sync -d
+        cp contrib/env-sample .env
 
     - name: Lint with flake8
       run: pipenv run flake8 .
