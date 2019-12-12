@@ -18,10 +18,24 @@ def servidor():
     yield (HOST, PORTA)
 
 
-@pytest.fixture
-def cliente(servidor):
+def _criar_cliente_socket():
     sock = socket(AF_INET, SOCK_STREAM)
-    sock.settimeout(3)
+    sock.settimeout(2)
+    return sock
+
+
+@pytest.fixture(scope='module')
+def cliente_telnet1(servidor):
+    sock = _criar_cliente_socket()
+    sock.connect(servidor)
+    yield sock
+    sock.shutdown(SHUT_RDWR)
+    sock.close()
+
+
+@pytest.fixture
+def cliente_telnet2(servidor):
+    sock = _criar_cliente_socket()
     sock.connect(servidor)
     yield sock
     sock.shutdown(SHUT_RDWR)
