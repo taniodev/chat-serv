@@ -11,6 +11,7 @@ pytest-mock = "*"
 
 [packages]
 python-decouple = "*"
+normality = "*"
 
 [requires]
 python_version = "3.8"

@@ -1,6 +1,6 @@
 import asyncio
 
-from app.telnet import telnet
+from app.servidor.telnet import telnet
 from app.settings import HOST, PORTA
 
 
