@@ -65,8 +65,8 @@ async def test_mensagem_para_todos_os_clientes(usuario_mock_interno):
 async def test_mensagem_ao_conectar_no_servidor():
     mensagens = [b'Fulano']
     calls = [
-        call('> Digite o seu nome:\n'.encode()),
-        call('*. Fulano entra na conversação\n'.encode()),
+        call('> Digite o seu nome:\n'.encode(encoding='iso-8859-1')),
+        call('*. Fulano entra na conversação\n'.encode(encoding='iso-8859-1')),
     ]
 
     writer_mock = criar_writer_mock()
