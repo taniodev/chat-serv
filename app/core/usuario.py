@@ -28,6 +28,19 @@ Atribui um nome ao usuário.
             return True
 
 
+async def alterar_nome(usuario: Usuario, _, nome: str) -> None:
+    """
+    Altera o nome do usuário que já está conectado.
+
+    :param usuario: O usuário que receberá o nome.
+    :param nome: O nome que deve ser atribuído ao usuário.
+
+    """
+    nome_antigo = usuario.nome
+    if await usuario.atribuir_nome(nome):
+        await usuario.msg.enviar_para_todos(f'*. Usuário {nome_antigo} é conhecido como {usuario.nome}')
+
+
 async def definir_nome(usuario: Usuario, nome: str) -> None:
     """
 Define um nome para o usuário quando ele está entrando no chat.

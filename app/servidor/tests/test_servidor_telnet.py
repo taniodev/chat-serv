@@ -1,33 +1,8 @@
-from unittest.mock import AsyncMock, call, Mock
+from unittest.mock import AsyncMock, call
 
 import pytest
 
 from app.core import usuarios_conectados
-from app.servidor.telnet import telnet
-
-
-def criar_reader_mock(mensagens_do_cliente: list) -> AsyncMock:
-    """Cria um objeto reader mock para os testes."""
-    reader = AsyncMock()
-    reader.read.side_effect = mensagens_do_cliente
-    return reader
-
-
-def criar_writer_mock() -> AsyncMock:
-    """Cria e prepara um objeto writer mock para os testes."""
-    writer_mock = AsyncMock()
-
-    # Um objeto AsyncMock que não é chamado com await, faz com que apareça warning ao rodar os testes
-    writer_mock.write = Mock()
-
-    return writer_mock
-
-
-async def rodar_telnet(reader_mock: AsyncMock, writer_mock: AsyncMock) -> None:
-    try:
-        await telnet(reader_mock, writer_mock)
-    except StopAsyncIteration:
-        pass
 
 
 @pytest.fixture
@@ -39,38 +14,66 @@ def usuario_mock_interno() -> AsyncMock:
     del usuarios_conectados['usr1']
 
 
-@pytest.mark.asyncio
-async def test_eco_da_mensagem():
-    mensagens = [b'Fulano', b'teste']
+@pytest.fixture
+def digita_nome():
+    """Simule um usuário que digitou o nome para entrar no chat."""
+    mensagens = [b'Fulano']
+    yield mensagens
+    usuarios_conectados.pop('fulano', None)
 
-    writer_mock = criar_writer_mock()
-    reader_mock = criar_reader_mock(mensagens)
-    await rodar_telnet(reader_mock, writer_mock)
+
+@pytest.mark.asyncio
+async def test_eco_da_mensagem(digita_nome, rodar_servidor_telnet):
+    digita_nome.append(b'teste')
+
+    reader_mock, writer_mock = await rodar_servidor_telnet(digita_nome)
 
     writer_mock.write.assert_called_with(b'Fulano: teste\n')
 
 
 @pytest.mark.asyncio
-async def test_mensagem_para_todos_os_clientes(usuario_mock_interno):
-    mensagens = [b'Fulano', b'teste']
+async def test_mensagem_para_todos_os_clientes(digita_nome, rodar_servidor_telnet, usuario_mock_interno):
+    digita_nome.append(b'teste')
 
-    writer_mock = criar_writer_mock()
-    reader_mock = criar_reader_mock(mensagens)
-    await rodar_telnet(reader_mock, writer_mock)
+    reader_mock, writer_mock = await rodar_servidor_telnet(digita_nome)
 
     usuario_mock_interno.msg.enviar.assert_called_with('Fulano: teste')
 
 
 @pytest.mark.asyncio
-async def test_mensagem_ao_conectar_no_servidor():
-    mensagens = [b'Fulano']
+async def test_mensagem_ao_conectar_no_servidor(digita_nome, rodar_servidor_telnet):
     calls = [
         call('> Digite o seu nome:\n'.encode(encoding='iso-8859-1')),
         call('*. Fulano entra na conversação\n'.encode(encoding='iso-8859-1')),
     ]
 
-    writer_mock = criar_writer_mock()
-    reader_mock = criar_reader_mock(mensagens)
-    await rodar_telnet(reader_mock, writer_mock)
+    reader_mock, writer_mock = await rodar_servidor_telnet(digita_nome)
 
     writer_mock.write.assert_has_calls(calls)
+
+
+@pytest.mark.asyncio
+async def test_comando_barra_nome(digita_nome, rodar_servidor_telnet):
+    digita_nome.append(b'/nome Beltrano')
+
+    reader_mock, writer_mock = await rodar_servidor_telnet(digita_nome)
+
+    writer_mock.write.assert_called_with('*. Usuário Fulano é conhecido como Beltrano\n'.encode(encoding='iso-8859-1'))
+
+
+@pytest.mark.asyncio
+async def test_comando_barra_nome_sem_argumentos(digita_nome, rodar_servidor_telnet):
+    digita_nome.append(b'/nome')
+
+    reader_mock, writer_mock = await rodar_servidor_telnet(digita_nome)
+
+    writer_mock.write.assert_called_with('> O nome deve ter entre 2 e 20 caracteres\n'.encode(encoding='iso-8859-1'))
+
+
+@pytest.mark.asyncio
+async def test_comando_inexistente(digita_nome, rodar_servidor_telnet):
+    digita_nome.append(b'/umcomandoqualquer umargumento')
+
+    reader_mock, writer_mock = await rodar_servidor_telnet(digita_nome)
+
+    writer_mock.write.assert_called_with('> Comando desconhecido: umcomandoqualquer\n'.encode(encoding='iso-8859-1'))

@@ -8,7 +8,7 @@ from app.servidor.protocolo import ProtocoloTelnet
 @pytest.mark.asyncio
 async def test_receber_mensagens():
     reader_mock = AsyncMock()
-    reader_mock.read.return_value = b'teste'
+    reader_mock.read.return_value = b' teste '
     writer_mock = AsyncMock()
     protocolo = ProtocoloTelnet(reader_mock, writer_mock)
 

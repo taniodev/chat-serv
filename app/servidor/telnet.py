@@ -1,4 +1,4 @@
-from app.comandos import filtrar_comandos
+from app.core.comandos import filtrar_comandos
 from app.core.usuario import Usuario
 from app.servidor.protocolo import ProtocoloTelnet
 
