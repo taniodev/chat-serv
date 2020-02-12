@@ -8,6 +8,8 @@ flake8 = "*"
 pytest = "*"
 pytest-asyncio = "*"
 pytest-mock = "*"
+pytest-cov = "*"
+codecov = "*"
 
 [packages]
 python-decouple = "*"
