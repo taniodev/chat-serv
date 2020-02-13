@@ -1,6 +1,5 @@
-from normality import normalize
-
 from app.core import usuarios_conectados
+from app.core.filtro import normalizar
 from app.core.mensageiro import Mensageiro
 from app.core.validador import nome_valido
 
@@ -12,23 +11,30 @@ class Usuario:
         self.nome_id = None
         self.protocolo = protocolo
 
+    def _separar_nome(self, texto: str) -> str:
+        texto = texto.lstrip()
+        texto = texto.split(' ')
+        return texto[0]
+
     async def atribuir_nome(self, nome: str) -> bool:
         """
-Atribui um nome ao usuário.
+        Atribui um nome ao usuário.
 
-:param nome: O nome que será atribuido.
-:return: True se o nome foi atribuido, False em caso contrário.
+        :param nome: O nome que será atribuido.
+        :return: True se o nome foi atribuido, False em caso contrário.
 
-"""
+        """
+        nome = self._separar_nome(nome)
+
         if await nome_valido(self.msg.enviar, nome):
             usuarios_conectados.pop(self.nome_id, None)
             self.nome = nome
-            self.nome_id = normalize(nome)
+            self.nome_id = normalizar(nome)
             usuarios_conectados[self.nome_id] = self
             return True
 
 
-async def alterar_nome(usuario: Usuario, _, nome: str) -> None:
+async def alterar_nome(usuario: Usuario, nome: str) -> None:
     """
     Altera o nome do usuário que já está conectado.
 

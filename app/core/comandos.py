@@ -1,10 +1,11 @@
-from app.core import lista_de_comandos
+from app.core import lista_de_comandos, usuarios_conectados
+from app.core.filtro import normalizar
 from app.core.usuario import alterar_nome, definir_nome
 
 lista_de_comandos['nome'] = alterar_nome
 
 
-def separar_comando(mensagem: str) -> tuple:
+def _separar_comando(mensagem: str) -> tuple:
     """
     Retorne uma tupla contendo o comando e o argumento presente na mensagem.
 
@@ -23,20 +24,32 @@ def separar_comando(mensagem: str) -> tuple:
             if letra == ' ':
                 argumentos += mensagem[indice+1:]
                 break
-            comando += letra.lower()
+            comando += normalizar(letra)
 
     return (comando, argumentos)
 
 
-async def comando_inexistente(usuario, comando: str, _) -> None:
-    """Envie uma mensagem informando que o comando não foi encontrado."""
-    await usuario.msg.enviar(f'> Comando desconhecido: {comando}')
+async def _executar_comando(usuario, mensagem: str) -> None:
+    """
+    Execute um comando do servidor.
+
+    Se o comando digitado for um comando existente, execute-o passando os argumentos.
+    Se o comando for correspondente a um usuário, envie uma mensagem privada apenas para este usuário.
+
+    """
+    comando, argumentos = _separar_comando(mensagem)
+
+    if comando in lista_de_comandos:
+        await lista_de_comandos[comando](usuario, argumentos)
+    elif comando in usuarios_conectados:
+        await usuarios_conectados[comando].msg.enviar(f'{usuario.nome} (pvt): {argumentos}')
+    else:
+        await usuario.msg.enviar(f'> Comando desconhecido: {comando}')
 
 
 async def filtrar_comandos(usuario, mensagem: str):
     if mensagem[0] == '/':
-        comando, argumentos = separar_comando(mensagem)
-        await lista_de_comandos.get(comando, comando_inexistente)(usuario, comando, argumentos)
+        await _executar_comando(usuario, mensagem)
         return
 
     if not usuario.nome_id or not usuario.nome:

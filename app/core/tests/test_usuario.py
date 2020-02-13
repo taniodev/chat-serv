@@ -15,8 +15,12 @@ def usuario():
 
 
 @pytest.mark.asyncio
-async def test_atribuir_nome(usuario):
-    await usuario.atribuir_nome('Açúcar')
+@pytest.mark.parametrize('nome', [
+    'Açúcar',
+    ' Açúcar Doce ',
+])
+async def test_atribuir_nome(nome, usuario):
+    await usuario.atribuir_nome(nome)
     assert usuario.nome == 'Açúcar'
     assert usuario.nome_id == 'acucar'
     assert usuario.nome_id in usuarios_conectados

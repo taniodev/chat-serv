@@ -77,3 +77,12 @@ async def test_comando_inexistente(digita_nome, rodar_servidor_telnet):
     reader_mock, writer_mock = await rodar_servidor_telnet(digita_nome)
 
     writer_mock.write.assert_called_with('> Comando desconhecido: umcomandoqualquer\n'.encode(encoding='iso-8859-1'))
+
+
+@pytest.mark.asyncio
+async def test_envio_de_mensagem_privada(digita_nome, rodar_servidor_telnet, usuario_mock_interno):
+    digita_nome.append(b'/usr1 teste')
+
+    reader_mock, writer_mock = await rodar_servidor_telnet(digita_nome)
+
+    usuario_mock_interno.msg.enviar.assert_called_with('Fulano (pvt): teste')
