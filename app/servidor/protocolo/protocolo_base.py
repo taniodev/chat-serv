@@ -19,8 +19,17 @@ class ProtocoloBase:
         mensagem = mensagem.strip()
         return mensagem
 
-    async def receber_mensagens(self) -> str:
-        """Receba as mensagens do socket."""
+    async def receber_mensagens(self) -> tuple:
+        """
+        Receba as mensagens do socket.
+
+        :return: tuple(
+            <str: A mensagem que veio do socket>,
+            <bool: Se for False, indica que a conexão foi interrompida e o loop principal será encerrado>,
+        )
+        A conexão pode ser interrompida quando o usuário fecha a janela do cliente que está usando para se conectar.
+
+        """
         raise NotImplementedError
 
     async def enviar_mensagens(self, mensagem: str) -> None:

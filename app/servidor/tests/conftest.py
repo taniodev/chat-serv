@@ -19,6 +19,7 @@ def writer_mock() -> AsyncMock:
 
     # Um objeto AsyncMock que não é chamado com await, faz com que apareça warning ao rodar os testes
     writer.write = Mock()
+    writer.close = Mock()
 
     return writer
 

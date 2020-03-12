@@ -12,9 +12,23 @@ async def test_receber_mensagens():
     writer_mock = AsyncMock()
     protocolo = ProtocoloTelnet(reader_mock, writer_mock)
 
-    mensagem = await protocolo.receber_mensagens()
+    mensagem, esta_conectado = await protocolo.receber_mensagens()
 
     assert mensagem == 'teste'
+    assert esta_conectado
+
+
+@pytest.mark.asyncio
+async def test_receber_mensagem_nula_ao_perder_conexao():
+    reader_mock = AsyncMock()
+    reader_mock.read.return_value = b''
+    writer_mock = AsyncMock()
+    protocolo = ProtocoloTelnet(reader_mock, writer_mock)
+
+    mensagem, esta_conectado = await protocolo.receber_mensagens()
+
+    assert mensagem == ''
+    assert esta_conectado is False
 
 
 @pytest.mark.asyncio

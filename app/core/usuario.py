@@ -6,6 +6,7 @@ from app.core.validador import nome_valido
 
 class Usuario:
     def __init__(self, protocolo) -> None:
+        self.esta_conectado = True
         self.msg = Mensageiro(usuarios_conectados, self)
         self.nome = None
         self.nome_id = None
@@ -32,6 +33,10 @@ class Usuario:
             self.nome_id = normalizar(nome)
             usuarios_conectados[self.nome_id] = self
             return True
+
+    async def desconectou(self):
+        """Chame este método antes de fechar a conexão."""
+        usuarios_conectados.pop(self.nome_id, None)
 
 
 async def alterar_nome(usuario: Usuario, nome: str) -> None:

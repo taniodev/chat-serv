@@ -23,6 +23,25 @@ def digita_nome():
 
 
 @pytest.mark.asyncio
+async def test_fechar_conexao_ao_desconectar(digita_nome, rodar_servidor_telnet):
+    digita_nome.append(b'')
+
+    reader_mock, writer_mock = await rodar_servidor_telnet(digita_nome)
+
+    assert writer_mock.close.called
+    assert writer_mock.wait_closed.called
+
+
+@pytest.mark.asyncio
+async def test_remover_objeto_da_lista_de_usuarios(digita_nome, rodar_servidor_telnet):
+    digita_nome.append(b'')
+
+    reader_mock, writer_mock = await rodar_servidor_telnet(digita_nome)
+
+    assert 'fulano' not in usuarios_conectados
+
+
+@pytest.mark.asyncio
 async def test_eco_da_mensagem(digita_nome, rodar_servidor_telnet):
     digita_nome.append(b'teste')
 
