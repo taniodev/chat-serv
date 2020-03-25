@@ -42,6 +42,15 @@ async def test_remover_objeto_da_lista_de_usuarios(digita_nome, rodar_servidor_t
 
 
 @pytest.mark.asyncio
+async def test_envio_mensagem_que_notifica_saida_de_usuario(digita_nome, rodar_servidor_telnet, usuario_mock_interno):
+    digita_nome.append(b'')
+
+    reader_mock, writer_mock = await rodar_servidor_telnet(digita_nome)
+
+    usuario_mock_interno.msg.enviar.assert_called_with('*. Usuário Fulano saiu da conversação')
+
+
+@pytest.mark.asyncio
 async def test_eco_da_mensagem(digita_nome, rodar_servidor_telnet):
     digita_nome.append(b'teste')
 

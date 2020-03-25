@@ -37,6 +37,7 @@ class Usuario:
     async def desconectou(self):
         """Chame este método antes de fechar a conexão."""
         usuarios_conectados.pop(self.nome_id, None)
+        await self.msg.enviar_para_todos(f'*. Usuário {self.nome} saiu da conversação')
 
 
 async def alterar_nome(usuario: Usuario, nome: str) -> None:
